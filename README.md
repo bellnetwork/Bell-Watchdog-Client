@@ -21,9 +21,7 @@ Step 1: Obtain Your API Token
 
 Log in to your BellBots customer portal at https://bellbots.eu.
 
-Navigate to your account settings or API settings to find your unique API token.
-
-Copy the API token, as you'll need it for script configuration.
+Navigate to your account and make sure that your server is setup.
 
 Step 2: Install Required Dependencies
 
@@ -55,9 +53,9 @@ Open the service file in a text editor to make necessary changes before moving i
 
 Make sure to modify the ExecStart and WorkingDirectory lines according to your file structure:
 
-ExecStart: Update the path to the sys_check.py script. The example uses /etc/bellsocket/services/sys_check.py, but you should replace it with the actual path to your script.
+ExecStart: Update the path to the sys_check.py script. The example uses /your/file/location/sys_check.py, but you should replace it with the actual path to your script.
 
-WorkingDirectory: Set this to the directory where the sys_check.py script is located (/etc/bellsocket/services in the example).
+WorkingDirectory: Set this to the directory where the sys_check.py script is located (/your/file/location/services in the example).
 
 Save the changes to the service file.
 
@@ -67,15 +65,15 @@ Open the script in a text editor.
 
 Make sure to modify the ExecStart and WorkingDirectory lines according to your file structure:
 
-ExecStart: Update the path to the sys_check.py script. The example uses /etc/bellsocket/services/sys_check.py, but you should replace it with the actual path to your script.
+ExecStart: Update the path to the sys_check.py script. The example uses /your/file/location/services/sys_check.py, but you should replace it with the actual path to your script.
 
-WorkingDirectory: Set this to the directory where the sys_check.py script is located (/etc/bellsocket/services in the example).
+WorkingDirectory: Set this to the directory where the sys_check.py script is located (/your/file/location/services in the example).
 
 Save the changes to the service file.
 
 Now, move the modified service file to the system directory for systemd service files.
 
-sudo mv path_to_downloaded_service_file /etc/systemd/system/sys_check.service
+sudo mv path_to_downloaded_service_file /your/file/location/sys_check.service
 
 **Step 5: Enable and Start the Service**
 
@@ -121,8 +119,11 @@ If you encounter any errors or need assistance with the setup, you can generate 
 
 In the terminal, navigate to the directory where the sys_check.py script is located. For example:
 
-    cd /etc/bellsocket/services
+    cd /your/file/location
     python3 sys_check.py
+or:
+
+    python3 /your/file/location/sys_check.py
 
 Run the following command to generate a secret key:
 
