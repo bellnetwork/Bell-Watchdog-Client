@@ -33,27 +33,19 @@ Open a terminal and run the following commands to install the required dependenc
 
 For Debian/Ubuntu:
 
-apt install python3 python3-pip
+    apt install python3 python3-pip
 
 For Centos:
 
-yum install python3 python3-pip
+    yum install python3 python3-pip
 
-pip3 install psutil requests
+    pip3 install psutil requests
 
 **Step 3: Configure the Script**
 
 Download the provided script (sys_check.py) to a directory on your server.
 
-Open the script in a text editor. Do not modify the script content, as it may break functionality.
-
-Find the following lines in the script:
-
-**Replace 'YOUR_API_TOKEN_HERE' with your actual API token**
-
-api_token = 'YOUR_API_TOKEN_HERE'
-
-Replace 'YOUR_API_TOKEN_HERE' with the API token you obtained in Step 1.
+    git clone https://github.com/bellnetwork/bellsysmoni.git
 
 **Step 4: Moving the Service File**
 
@@ -89,17 +81,17 @@ sudo mv path_to_downloaded_service_file /etc/systemd/system/sys_check.service
 
 Enable the service to start on boot:
 
-sudo systemctl enable sys_check.service
+    systemctl enable sys_check.service
 
 Start the service:
 
-sudo systemctl start sys_check.service
+    ystemctl start sys_check.service
     
 Step 6: Manual Script Execution
 
 To manually execute the script for debugging purposes, open a terminal and navigate to the directory where the script is located. Run the following command:
 
-python3 sys_check.py
+    python3 sys_check.py
 
 This will run the script interactively in your terminal, allowing you to observe its behavior and check for any errors.
 
@@ -109,11 +101,12 @@ If you encounter any errors or need assistance with the setup, you can generate 
 
 In the terminal, navigate to the directory where the sys_check.py script is located. For example:
 
-cd /etc/bellsocket/services
+    cd /etc/bellsocket/services
+    python3 sys_check.py
 
 Run the following command to generate a secret key:
 
-python3 -c "import secrets; print(secrets.token_hex(16))"
+    python3 -c "import secrets; print(secrets.token_hex(16))"
 
 A secret key will be generated and displayed in the terminal. Copy this key and keep it secure.
 
