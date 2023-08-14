@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.INFO)  # Set the root logger's level to INFO
 logger = logging.getLogger(__name__)
 
 # Uncomment this line to activate debug logging
-logger.setLevel(logging.DEBUG)
+#logger.setLevel(logging.DEBUG)
 
 result = subprocess.run(["dir"], shell=True, capture_output=True, text=True)
 
