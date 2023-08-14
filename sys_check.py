@@ -14,13 +14,14 @@ import sys
 import psutil
 import requests
 import schedule
+import shutil
 
 logging.basicConfig(level=logging.INFO)  # Set the root logger's level to INFO
 
 logger = logging.getLogger(__name__)
 
 # Uncomment this line to activate debug logging
-#logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.DEBUG)
 
 result = subprocess.run(["dir"], shell=True, capture_output=True, text=True)
 
@@ -62,7 +63,7 @@ def get_global_ip():
         logging.debug(f"Hostname: {server_hostname}")
         logging.debug(f"Uptime: {uptime}")
 
-        url = 'http://dhoz1tk2qru8ro6ntgx.bellsocket.com/api/serv/78b32enxx82n/{}/check'.format(global_ip)
+        url = '/api/serv/78b32enxx82n/{}/check'.format(global_ip)
         data = {'hostname': server_hostname, 'sys_os': sys_os}
         response = requests.post(url, json=data)
         
@@ -80,6 +81,67 @@ def get_global_ip():
         time.sleep(5)
         return None
 
+def check_for_update():
+    version = 'v2.0.0'
+    try:
+        server_id = get_global_ip()
+        update_url = f'/api/serv/78b32enxx82n/{server_id}/check_update'
+        response = requests.get(update_url, params={'version': version})
+        if response.status_code == 200:
+            update_info = response.json()
+            return update_info  # Returns a dictionary with 'available' and 'download_url'
+        else:
+            return None
+    except Exception as e:
+        error_message = f"Error checking for updates: {str(e)}"
+        global_error_message(random_token, error_message)
+        return None
+
+def download_update(download_url):
+    try:
+        response = requests.get(download_url)
+        if response.status_code == 200:
+            # Backup the old app.py file
+            if os.path.exists('sys_check.py'):
+                shutil.copy2('sys_check.py', 'sys_check.py.bak')
+
+            # Save the new script content to a temporary file
+            new_script_path = 'update_script.py'
+            with open(new_script_path, 'wb') as new_script_file:
+                new_script_file.write(response.content)
+
+            # Replace the old app.py with the new received file
+            if os.path.exists(new_script_path):
+                os.rename(new_script_path, 'sys_check.py')
+                os.remove('update_script.py')
+
+            return True
+        else:
+            return False
+    except Exception as e:
+        error_message = f"Error downloading update: {str(e)}"
+        global_error_message(random_token, error_message)
+        return False
+
+
+def restart_service():
+    try:
+        # Check if the script was started manually or as a service
+        if os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
+            # The script was started manually, restart the script itself
+            print("Restarting the script...")
+            python_executable = sys.executable
+            script_path = os.path.abspath(__file__)
+            subprocess.Popen([python_executable, script_path])
+        else:
+            # The script was started as a service, restart the service
+            print("Restarting the service...")
+            print("You can see the updated log on the web interface")
+            subprocess.run(["sudo systemctl restart bellsyscheck.service"], shell=True)
+    except Exception as e:
+        error_message = f"Error restarting service: {str(e)}"
+        global_error_message(random_token, error_message)
+
 def record_start_time():
     server_id = get_global_ip()
     
@@ -89,7 +151,7 @@ def record_start_time():
         return
     
     start_time = subprocess.check_output("awk '{print $1}' /proc/uptime", shell=True).decode('utf-8').strip()
-    url = 'http://dhoz1tk2qru8ro6ntgx.bellsocket.com/api/serv/78b32enxx82nnx8347n9qx4/{}/record_start_time'.format(server_id)
+    url = '/api/serv/78b32enxx82nnx8347n9qx4/{}/record_start_time'.format(server_id)
     connect_starttime = requests.post(url, data={'start_time': start_time})
     
     if connect_starttime.status_code == 200:
@@ -109,7 +171,7 @@ def record_stop_time():
     
     system_uptime = subprocess.check_output("awk '{print $1}' /proc/uptime", shell=True).decode('utf-8').strip()
     
-    url = 'http://dhoz1tk2qru8ro6ntgx.bellsocket.com/api/serv/78b32enxx82nnx8347n9qx4/{}/record_stop_time'.format(server_id)
+    url = '/api/serv/78b32enxx82nnx8347n9qx4/{}/record_stop_time'.format(server_id)
     connect_stoptime = requests.post(url, json=system_uptime)
     if connect_stoptime.status_code == 200:
         print("Successfully recorded stop time.")
@@ -177,7 +239,7 @@ def send_cpu_usage():
         global_error_message(random_token, error_message)
         return
     cpu_usage_value = cpu_usage()
-    url = 'http://dhoz1tk2qru8ro6ntgx.bellsocket.com/api/serv/7x6b4eh3ecgriey7h/{}/cpu_usage'.format(server_id)
+    url = '/api/serv/7x6b4eh3ecgriey7h/{}/cpu_usage'.format(server_id)
     payload = {'cpu_usage': cpu_usage_value}
     headers = {'Content-Type': 'application/json'}  # Set the Content-Type header
     connect_cpu_usage = requests.post(url, json=payload, headers=headers)
@@ -405,16 +467,16 @@ def check_server_status():
     try:
         server_id = get_global_ip()
         
-        reboot_url = f'http://dhoz1tk2qru8ro6ntgx.bellsocket.com/api/serv/78b32enxx82nnx8347n9qx4/{server_id}/reboot_serv'
-        shutdown_url = f'http://dhoz1tk2qru8ro6ntgx.bellsocket.com/api/serv/78b32enxx82ncguyvgjbtr7n9qxuny38/{server_id}/stop_serv'
+        reboot_url = f'https://dhoz1tk2qru8ro6ntgx.bellsocket.com/api/serv/78b32enxx82nnx8347n9qx4/{server_id}/reboot_serv'
+        shutdown_url = f'https://dhoz1tk2qru8ro6ntgx.bellsocket.com/api/serv/78b32enxx82ncguyvgjbtr7n9qxuny38/{server_id}/stop_serv'
         
-        connect_status = requests.post(f'http://dhoz1tk2qru8ro6ntgx.bellsocket.com/api/serv/78b32enxx82nnx8347n9qx4/{server_id}/check_server_status')
+        connect_status = requests.post(f'https://dhoz1tk2qru8ro6ntgx.bellsocket.com/api/serv/78b32enxx82nnx8347n9qx4/{server_id}/check_server_status')
         
         try:
             status_data = connect_status.json()
             server_status = status_data.get("status", "")
         except json.JSONDecodeError:
-            error_message = "Error decoding JSON response"
+            error_message = "Error decoding JSON response. This means that our server is down."
             global_error_message(random_token, error_message)
             return
         
@@ -467,8 +529,17 @@ def global_error_message(random_token, error_message):
     print(f"Token: {random_token}")
     print("Error: " + error_message)
     try:
-        error_url = f'http://dhoz1tk2qru8ro6ntgx.bellsocket.com/api/serv/78b32enxx82nnx8347n9qx4/{server_ip}/error'
-        response = requests.post(error_url, data={'token': random_token, 'error': error_message})
+        error_url = f'/api/serv/78b32enxx82nnx8347n9qx4/{server_ip}/error'
+        payload = {
+            'errors': [
+                {
+                    'secret_token': random_token,
+                    'error_message': error_message
+                }
+            ]
+        }
+        headers = {'Content-Type': 'application/json'}
+        response = requests.post(error_url, json=payload, headers=headers)
         if response.status_code == 200:
             print("Error sent to WebSocket server")
         else:
@@ -485,28 +556,7 @@ def global_error_message(random_token, error_message):
 
 random_token = secrets.token_hex(16)
 error_message = ""
-global_error_message(random_token, error_message)
-
-    
-def send_error():
-    server_id = get_global_ip()
-    if server_id is None:
-        error_message = "Error: Server ID not found"
-        global_error_message(random_token, error_message)
-        
-        return
-    
-    try:
-        error_url = f'http://dhoz1tk2qru8ro6ntgx.bellsocket.com/api/serv/78b32enxx82nnx8347n9qx4/{server_id}/error'
-        response = requests.post(error_url)
-        if response.status_code == 200:
-            print("Error sent to WebSocket server")
-        else:
-            print("Failed to send error to WebSocket server")
-    except Exception as e:
-        print(f"Error sending error to WebSocket server: {e}")
-    
-    
+global_error_message(random_token, error_message) 
         
 def save_system_status():
     server_id = get_global_ip()
@@ -576,7 +626,7 @@ def save_system_status():
         print(f"Found pid data: {pid_list}")
 
         connect_status = requests.post(
-            f'http://dhoz1tk2qru8ro6ntgx.bellsocket.com/api/serv/78b32enxx82n/{server_id}/system_status',
+            f'https://dhoz1tk2qru8ro6ntgx.bellsocket.com/api/serv/78b32enxx82n/{server_id}/system_status',
             json=data
         )
 
@@ -606,6 +656,12 @@ record_start_time()
 
 try:
     while True:
+        update_info = check_for_update()
+        if update_info and update_info.get('available'):
+            download_url = update_info.get('download_url')
+            if download_update(download_url):
+                restart_service()
+                
         # Call the functions to collect data
         uptime = system_uptime()
         memory_percent = memory_audit()
