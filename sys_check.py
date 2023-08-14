@@ -1,19 +1,15 @@
-from decimal import Decimal
 from datetime import datetime
 import json
 import logging
 import os
-from sched import scheduler
 import secrets
 import subprocess
 import datetime
-import mariadb
 import atexit
 import time
 import sys
 import psutil
 import requests
-import schedule
 import shutil
 
 logging.basicConfig(level=logging.INFO)  # Set the root logger's level to INFO
@@ -63,7 +59,7 @@ def get_global_ip():
         logging.debug(f"Hostname: {server_hostname}")
         logging.debug(f"Uptime: {uptime}")
 
-        url = '/api/serv/78b32enxx82n/{}/check'.format(global_ip)
+        url = 'https://dhoz1tk2qru8ro6ntgx.bellsocket.com/api/serv/78b32enxx82n/{}/check'.format(global_ip)
         data = {'hostname': server_hostname, 'sys_os': sys_os}
         response = requests.post(url, json=data)
         
@@ -82,10 +78,10 @@ def get_global_ip():
         return None
 
 def check_for_update():
-    version = 'v2.0.0'
+    version = 'v2.0.3'
     try:
         server_id = get_global_ip()
-        update_url = f'/api/serv/78b32enxx82n/{server_id}/check_update'
+        update_url = f'https://dhoz1tk2qru8ro6ntgx.bellsocket.com/api/serv/78b32enxx82n/{server_id}/check_update'
         response = requests.get(update_url, params={'version': version})
         if response.status_code == 200:
             update_info = response.json()
@@ -136,7 +132,6 @@ def restart_service():
         else:
             # The script was started as a service, restart the service
             print("Restarting the service...")
-            print("You can see the updated log on the web interface")
             subprocess.run(["sudo systemctl restart bellsyscheck.service"], shell=True)
     except Exception as e:
         error_message = f"Error restarting service: {str(e)}"
@@ -151,7 +146,7 @@ def record_start_time():
         return
     
     start_time = subprocess.check_output("awk '{print $1}' /proc/uptime", shell=True).decode('utf-8').strip()
-    url = '/api/serv/78b32enxx82nnx8347n9qx4/{}/record_start_time'.format(server_id)
+    url = 'https://dhoz1tk2qru8ro6ntgx.bellsocket.com/api/serv/78b32enxx82nnx8347n9qx4/{}/record_start_time'.format(server_id)
     connect_starttime = requests.post(url, data={'start_time': start_time})
     
     if connect_starttime.status_code == 200:
@@ -171,7 +166,7 @@ def record_stop_time():
     
     system_uptime = subprocess.check_output("awk '{print $1}' /proc/uptime", shell=True).decode('utf-8').strip()
     
-    url = '/api/serv/78b32enxx82nnx8347n9qx4/{}/record_stop_time'.format(server_id)
+    url = 'https://dhoz1tk2qru8ro6ntgx.bellsocket.com/api/serv/78b32enxx82nnx8347n9qx4/{}/record_stop_time'.format(server_id)
     connect_stoptime = requests.post(url, json=system_uptime)
     if connect_stoptime.status_code == 200:
         print("Successfully recorded stop time.")
@@ -239,7 +234,7 @@ def send_cpu_usage():
         global_error_message(random_token, error_message)
         return
     cpu_usage_value = cpu_usage()
-    url = '/api/serv/7x6b4eh3ecgriey7h/{}/cpu_usage'.format(server_id)
+    url = 'https://dhoz1tk2qru8ro6ntgx.bellsocket.com/api/serv/7x6b4eh3ecgriey7h/{}/cpu_usage'.format(server_id)
     payload = {'cpu_usage': cpu_usage_value}
     headers = {'Content-Type': 'application/json'}  # Set the Content-Type header
     connect_cpu_usage = requests.post(url, json=payload, headers=headers)
@@ -529,7 +524,7 @@ def global_error_message(random_token, error_message):
     print(f"Token: {random_token}")
     print("Error: " + error_message)
     try:
-        error_url = f'/api/serv/78b32enxx82nnx8347n9qx4/{server_ip}/error'
+        error_url = f'https://dhoz1tk2qru8ro6ntgx.bellsocket.com/api/serv/78b32enxx82nnx8347n9qx4/{server_ip}/error'
         payload = {
             'errors': [
                 {
