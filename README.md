@@ -86,19 +86,25 @@ Enable the service to start on boot:
 Start the service:
 
     service sys_check start
+    
 or:
+
     systemctl start sys_check
 
 Stop the service:
 
     service sys_check stop
+    
 or:
+
     systemctl start sys_check
 
 Restart the service:
 
     service sys_check restart
+    
 or:
+
     systemctl start sys_check
     
 Step 6: Manual Script Execution
