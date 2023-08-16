@@ -1,38 +1,59 @@
-# Bell System Monitor 
+# Bell Linux Monitoring Script
 
-**Server Monitoring Script Setup Guide**
-This guide will walk you through setting up and using the server monitoring script on Debian, Ubuntu, and CentOS operating systems. The script collects various system metrics and sends them to a WebSocket server for analysis. Please follow the steps below to get started.
+The Bell macOS Monitoring script is a Python-based monitoring tool designed to collect and report various system metrics from macOS-based servers. It provides functionalities for monitoring system performance, tracking resource usage, checking for updates, and sending alerts. The script is intended to be run as a background service and can be customized to suit specific monitoring needs.
 
-**Prerequisites**
-Before you begin, ensure you have the following prerequisites:
+## Overview
 
-Python 3 installed on your system
+The script utilizes various Python libraries and system commands to gather information about the system's performance, resource utilization, network activity, and more. It communicates with a remote server to report the collected data, allowing users to monitor their macOS server's health and status remotely.
 
-The pip package manager
+## Features
 
-Plugin psutil installed
+- **System Information:** Collects and reports essential system information, including the global IP address, hostname, uptime, and operating system version.
 
-Plugin requests installed
+- **Update Check:** Periodically checks for updates and downloads and installs them if available, ensuring that the monitoring tool is up-to-date.
 
-Internet connectivity
+- **Resource Monitoring:** Monitors CPU usage, memory usage, disk usage, network bandwidth, and other system resources.
 
-Valid Package on bellbots.eu
+- **Temperature Monitoring:** Gathers temperature data from system sensors, providing insights into the server's thermal state.
 
-New server created on the bellbots.eu portal
+- **Process Monitoring:** Tracks running processes and their CPU usage, allowing users to monitor the performance of individual processes.
 
+- **Alerting Mechanisms:** Can be configured to send alerts based on predefined thresholds for disk usage, swap usage, and network latency.
 
-**Step 1: Obtain Your API Token**
+- **Service Status Monitoring:** Checks the status of a specific service and can trigger server reboot or shutdown actions based on the server's status.
 
-Log in to your BellBots customer portal at https://bellbots.eu.
+## Usage
 
-Enter your server information and save it to use this script.
+**Dependencies:** The script relies on various Python libraries, including psutil, requests, and others. Make sure these dependencies are installed.
 
+**Configuration:** Configure the script by modifying the settings at the beginning of the script. Customize alert thresholds, URLs, and other parameters to match your requirements.
 
-**Step 2: Install Required Dependencies**
+**Execution:** Run the script as a background service. It will continuously gather data and send it to a remote server for monitoring.
 
-Open a terminal and run the following commands to install the required dependencies:
+**Alerts:** Configure alerting mechanisms by setting threshold values for resource usage. The script will send alerts if resource usage exceeds the specified thresholds.
 
-# Install Dependencies
+## Disclaimer
+
+This script is provided as a starting point for creating a monitoring tool and may require additional adjustments to work seamlessly with your system and network environment. It's important to review and test the script in a controlled environment before deploying it to production systems.
+
+**Important Note:** This script is intended to be used exclusively with a booked service on the bellbots.eu platform. The provided IP address is crucial for verification, and unauthorized use is strictly prohibited. Ensure that you have a legitimate booking on bellbots.eu and have entered the correct IP address for verification. Unauthorized use may result in account suspension or legal action.
+
+## Installation and Usage Guide
+
+### Prerequisites
+
+    macOS-based server
+    Python 3.x installed
+    Internet connectivity
+
+### Installation Steps
+
+1. Clone the Repository:
+
+        git clone gh repo clone bellnetwork/bellsys_moni_macos
+        cd bellsys_moni_macos
+
+### Install Dependencies:
 
 For Debian/Ubuntu:
 
@@ -44,111 +65,49 @@ For Centos:
 
     pip3 install psutil requests
 
-**Step 3: Configure the Script**
 
-Download the provided script (sys_check.py) to a directory on your server.
+### Run the Script:
+ 
+    python3 sys_check.py &
 
-    git clone https://github.com/bellnetwork/bellsysmoni.git
+### Usage Guide
 
-**Step 4: Moving the Service File**
+Monitoring Data: The script will continuously monitor various metrics, such as CPU usage, memory usage, network activity, and more.
 
-Download the provided service file (sys_check.service) to your server.
+Alerts: If configured, the script will send alerts when predefined thresholds are exceeded.
 
-Open the service file in a text editor to make necessary changes before moving it.
+Update Check: The script will periodically check for updates and install them if available. This ensures the monitoring tool is up-to-date.
 
-Make sure to modify the ExecStart and WorkingDirectory lines according to your file structure:
+Remote Monitoring: The collected data is sent to a remote server for monitoring. Configure the URLs in the script to match your remote server's endpoints.
 
-ExecStart: Update the path to the sys_check.py script. The example uses /your/file/location/sys_check.py, but you should replace it with the actual path to your script.
+### Stopping the Script
+To stop the script, find its process ID (PID) and use the kill command.
 
-WorkingDirectory: Set this to the directory where the sys_check.py script is located (/your/file/location/services in the example).
+### Setup launchctl
+Edit and move the .plist file. Ensure the correct path is entered.
 
-Save the changes to the service file.
+    vi com.bellsyscheck.plist
+    mv com.bellsyscheck.plist /Library/LaunchDaemons/com.bellsyscheck.plist
 
-Now, move the modified service file to the system directory for systemd service files. Run:
+Load and start the service:
 
-Open the script in a text editor.
+    sudo launchctl load /Library/LaunchDaemons/com.bellsyscheck.plist
+    sudo launchctl start com.bellsyscheck
 
-Make sure to modify the ExecStart and WorkingDirectory lines according to your file structure:
+Verify the Service:
 
-ExecStart: Update the path to the sys_check.py script. The example uses /your/file/location/services/sys_check.py, but you should replace it with the actual path to your script.
+    sudo launchctl list | grep com.bellsyscheck
 
-WorkingDirectory: Set this to the directory where the sys_check.py script is located (/your/file/location/services in the example).
+## Logs and Unloading
+Logs are written to /var/log/bellsyscheck.log and /var/log/bellsyscheck_error.log.
+To stop and unload the service:
 
-Save the changes to the service file.
+    sudo launchctl stop com.bellsyscheck
+    sudo launchctl unload /Library/LaunchDaemons/com.bellsyscheck.plist
 
-Now, move the modified service file to the system directory for systemd service files.
+### Customization and Advanced Usage
+The script's core functionality is tightly integrated with the bellbots.eu platform. Unauthorized modifications may cause malfunctions. While you can't modify the core code, you can suggest new features through bellbots.eu support.
 
-sudo mv path_to_downloaded_service_file /your/file/location/sys_check.service
+For customization, adjust intervals for data collection, alerts, and updates. Always ensure changes align with intended usage and bellbots.eu service context. Your feedback is valuable for ongoing improvements.
 
-**Step 5: Enable and Start the Service**
-
-Enable the service to start on boot:
-
-    systemctl enable sys_check.service
-
-Start the service:
-
-    service sys_check start
-    
-or:
-
-    systemctl start sys_check
-
-Stop the service:
-
-    service sys_check stop
-    
-or:
-
-    systemctl start sys_check
-
-Restart the service:
-
-    service sys_check restart
-    
-or:
-
-    systemctl restart sys_check
-    
-Step 6: Manual Script Execution
-
-To manually execute the script for debugging purposes, open a terminal and navigate to the directory where the script is located. Run the following command:
-
-    python3 sys_check.py
-
-This will run the script interactively in your terminal, allowing you to observe its behavior and check for any errors.
-
-**Generating a Secret Key for Support (Optional)**
-
-If you encounter any errors or need assistance with the setup, you can generate a secret key that will allow our support team to help you efficiently. Follow these steps:
-
-In the terminal, navigate to the directory where the sys_check.py script is located. For example:
-
-    cd /your/file/location
-    python3 sys_check.py
-
-or:
-
-    python3 /your/file/location/sys_check.py
-
-Run the following command to generate a secret key:
-
-    python3 -c "import secrets; print(secrets.token_hex(16))"
-
-A secret key will be generated and displayed in the terminal. Copy this key and keep it secure.
-
-If you need to reach out to our support team, provide them with the secret key. This key will allow them to better understand your setup and assist you more effectively.
-
-Remember, generating and sharing this secret key is optional, but it can greatly aid our support team in helping you troubleshoot any issues you encounter.
-
-**Customization and Advanced Usage**
-
-Please note that the script's core functionality is tightly integrated with the bellbots.eu platform, and unauthorized modifications may cause the script to malfunction or behave unpredictably. We strongly discourage any modifications to the script's existing codebase.
-
-If you have ideas for new features or improvements, we encourage you to share your suggestions with us. You can create a new support ticket on bellbots.eu to propose new features or discuss potential enhancements. Our team will review your suggestions and consider them for future updates to the script.
-
-While you are not allowed to directly modify the script's core code, you can still enhance its capabilities by suggesting new monitoring functions, alert mechanisms, or additional system metrics. Your feedback is valuable to us and can contribute to the ongoing improvement of the Bell macOS Monitoring script.
-
-As for customizing the script's behavior, you can adjust the intervals at which data is collected, alerts are checked, and updates are performed. However, please exercise caution and ensure that any changes align with the intended functionality and usage of the script within the context of the bellbots.eu service.
-
-Thank you for your understanding and cooperation in adhering to the script's usage guidelines. If you have any questions or suggestions, please don't hesitate to reach out to us through the support channels provided on bellbots.eu.
+Thank you for understanding and adhering to usage guidelines. For questions or suggestions, reach out via bellbots.eu support channels.
