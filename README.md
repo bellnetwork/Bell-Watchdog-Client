@@ -1,7 +1,7 @@
-# bellsysmoni
+# Bell System Monitor 
 
 **Server Monitoring Script Setup Guide**
-This guide will walk you through setting up and using the server monitoring script. The script collects various system metrics and sends them to a WebSocket server for analysis. Please follow the steps below to get started.
+This guide will walk you through setting up and using the server monitoring script on Debian, Ubuntu, and CentOS operating systems. The script collects various system metrics and sends them to a WebSocket server for analysis. Please follow the steps below to get started.
 
 **Prerequisites**
 Before you begin, ensure you have the following prerequisites:
