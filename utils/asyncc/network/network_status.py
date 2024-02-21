@@ -1,9 +1,10 @@
 # Utils Network Status Check
 
-import socket, asyncio, subprocess, logging
+import socket, asyncio, subprocess
 
 from utils.asyncc.services.service_names import get_service_name
 from utils.asyncc.user.get_user_data import get_user_name
+from utils.sys.sys_messages.logging import setup_custom_logging
 
 server_name = subprocess.check_output("hostname", shell=True).decode().strip()
 # Define the services you are interested in
@@ -42,24 +43,27 @@ async def check_network_status(sio):
 
                 # Check if user is logged in
                 username = await get_user_name(user_ip)
-                if username != "Unknown":
+                if username != 'Unknown':
                     # User is logged in
-                    logging.error('im here')
                     data_one = f'User {username} ({user_ip}) reconnected to {service_name}'
+                    setup_custom_logging('info', 'User Reconnected', data_one)
                     sio.emit('network_status_update', data_one)
                 else:
                     # New user connected
                     connected_users[user_ip] = None
-                    data_two = f"New user ({user_ip}) connected to {service_name}"
+                    data_two = f'New user ({user_ip}) connected to {service_name}'
+                    setup_custom_logging('error', 'New Connection', data_two)
                     sio.emit('network_status_update', data_two)
 
                 # Check if user is trying to access via SSH and whether the attempt failed or succeeded
-                if "sshd" in access_details:
-                    if "Failed password" in access_details:
+                if 'sshd' in access_details:
+                    if 'Failed password' in access_details:
                         username = access_details.split()[-3]
-                        data_three = f"Failed SSH login attempt by user {username} ({user_ip})"
+                        data_three = f'Failed SSH login attempt by user {username} ({user_ip})'
+                        setup_custom_logging('error', 'Connection Attempt', data_three)
                         sio.emit('network_status_update', data_three)
-                    elif "Accepted" in access_details:
+                    elif 'Accepted' in access_details:
                         username = access_details.split()[-1]
-                        data_four = f"Successful SSH login by user {username} ({user_ip})"
+                        data_four = f'Successful SSH login by user {username} ({user_ip})'
+                        setup_custom_logging('error', 'New Connection', data_four)
                         sio.emit('network_status_update', data_four)

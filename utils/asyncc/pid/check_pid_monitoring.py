@@ -1,5 +1,8 @@
-import logging, psutil
+# PID Monitoring.py
+
+import psutil
 import datetime
+from utils.sys.sys_messages.logging import setup_custom_logging
 
 async def pid_monitoring(sio):
     try:
@@ -16,13 +19,12 @@ async def pid_monitoring(sio):
                     'uptime': uptime_str
                 }
                 pid_info_list.append(pid_info)
-
-                logging.error(f"PID: {process.info['pid']}, Name: {process.info['name']}, Uptime: {uptime_str}")
+                
+                setup_custom_logging('info', 'PID Status', ' PID: | Name: | Uptime:')
+                setup_custom_logging('info', 'PID Status', f" {process.info['pid']} | {process.info['name']} | {uptime_str}")
                 await sio.emit('live_pid_monitoring_check', pid_info)
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 # Handle processes that might have terminated or are not accessible
                 continue
     except Exception as e:
-        logging.error(f'got error in pid_monitoring: {e}')
-        #error_message = f"Error: {str(e)}"
-        #global_error_message(random_token, error_message)
+        setup_custom_logging('error', 'PID Status', f' There was an error: {e}')

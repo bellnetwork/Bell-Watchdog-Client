@@ -1,4 +1,5 @@
 import subprocess
+from utils.sys.sys_messages.logging import setup_custom_logging
 
 async def get_user_name(ip_address):
     try:
@@ -8,5 +9,5 @@ async def get_user_name(ip_address):
             if ip_address in line:
                 return line.split()[0]
     except Exception as e:
-        print(f"Error getting user name: {e}")
+        setup_custom_logging('error', 'Get User Data', f' There was an error: {e}')  
     return "Unknown"

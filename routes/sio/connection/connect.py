@@ -1,14 +1,13 @@
 # Connect.py
 
-import logging
+from utils.sys.sys_messages.logging import setup_custom_logging
 
 def accept_connect(sio):
     @sio.event
     async def connect():
-        logging.error("I'm connected!")
-        sio.emit('message', 'Hello, this is the server x3nwcbr3')
+        setup_custom_logging('info', 'Connection Status', 'Connected to the websocket server.')
 
 def accept_reconnect(sio): 
     @sio.event
     async def reconnect():
-        print("Reconnected to the server.")
+        setup_custom_logging('info', 'Connection Status', 'Reconnected to the server.')

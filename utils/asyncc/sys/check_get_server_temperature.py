@@ -1,4 +1,5 @@
-import logging, psutil
+import psutil
+from utils.sys.sys_messages.logging import setup_custom_logging
 
 async def get_server_temperature(sio):
     try:
@@ -11,9 +12,7 @@ async def get_server_temperature(sio):
             
             # Assuming you want to get the average temperature of all cores
             total_temperature = sum(sensor.current for sensor in core_temperatures) / len(core_temperatures)
-            logging.error(f"Total temperature: {total_temperature}")
+            setup_custom_logging('info', 'Total temperature', f' {total_temperature}')
             await sio.emit('live_get_server_temperature_check', {'total_temperature': total_temperature})
     except Exception as e:
-        logging.error(f'got error in get_server_temperature: {e}')
-        #error_message = f"Error: {str(e)}"
-        #global_error_message(random_token, error_message)        
+        setup_custom_logging('error', 'Total temperature', f' There was an error: {e}')      

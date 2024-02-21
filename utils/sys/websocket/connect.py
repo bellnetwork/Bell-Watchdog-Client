@@ -1,10 +1,9 @@
 # Create connection py
 
-import asyncio, logging, socketio
+import asyncio, socketio
 
-# Import the event handler imports module
 from utils.imports import function_handler_imports as ehi
-
+from utils.sys.sys_messages.logging import setup_custom_logging
 
 async def main(sio):
     ehi.accept_connect(sio)
@@ -33,6 +32,6 @@ async def main(sio):
             #await ehi.pid_monitoring(sio)     
             await asyncio.sleep(10)  # Check every 10 seconds
     except KeyboardInterrupt:
-        logging.error("Disconnecting due to keyboard interrupt.")
+        setup_custom_logging('error', 'Connection Status', ' Disconnecting due to keyboard interrupt.')  
         await sio.disconnect()
         

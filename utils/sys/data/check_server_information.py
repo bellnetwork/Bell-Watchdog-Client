@@ -1,4 +1,4 @@
-import platform, logging
+import platform
 
 def server_information(sio):
 

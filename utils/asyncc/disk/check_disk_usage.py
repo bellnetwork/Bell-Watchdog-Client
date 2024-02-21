@@ -1,4 +1,5 @@
-import logging, subprocess
+import subprocess
+from utils.sys.sys_messages.logging import setup_custom_logging
 
 async def disk_usage(sio):
     try:
@@ -6,9 +7,7 @@ async def disk_usage(sio):
         disk_percent = disk_usage_output.strip()  # Remove leading/trailing whitespace
         disk_percent = disk_percent.rstrip('%')  # Remove trailing '%'
         disk_usage = float(disk_percent)
-        logging.error(f"Disk Usage: {disk_usage}")
+        setup_custom_logging('info', 'Disk Usage', f' {disk_usage}')
         await sio.emit('live_disk_usage_check', disk_usage)
     except subprocess.CalledProcessError as e:
-        logging.error(f"got error in disk_usage: {disk_usage}")
-        #error_message = f"Error: {str(e)}"
-        #global_error_message(random_token, error_message)
+        setup_custom_logging('error', 'Disk Usage', f' There was an error: {e}')
