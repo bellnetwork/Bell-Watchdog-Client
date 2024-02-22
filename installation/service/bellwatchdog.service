@@ -1,0 +1,13 @@
+[Unit]
+Description=Bell Watchdog
+After=network.target
+
+[Service]
+User=root
+ExecStart=/usr/bin/python3 /etc/bell/bellwatchdog/app.py
+WorkingDirectory=/etc/bell/bellwatchdog/
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+/etc/bell/bellwatchdog/app.py
