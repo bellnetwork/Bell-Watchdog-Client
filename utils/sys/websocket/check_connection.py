@@ -1,6 +1,6 @@
 import asyncio
 from utils.sys.sys_messages.logging import setup_custom_logging
-from sys.config.conf import *
+from utils.sys.config.conf import *
 
 async def create_connection(sio):
     while True:
