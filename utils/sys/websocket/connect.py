@@ -8,7 +8,7 @@ from utils.sys.sys_messages.logging import setup_custom_logging
 async def main(sio):
     ehi.accept_connect(sio)
     ehi.accept_disconnect(sio)
-    await ehi.create_connection(sio, socketio)
+    await ehi.create_connection(sio)
     try:
         while True:
             #await ehi.check_attempts_logs(sio)
@@ -34,4 +34,3 @@ async def main(sio):
     except KeyboardInterrupt:
         setup_custom_logging('error', 'Connection Status', ' Disconnecting due to keyboard interrupt.')  
         await sio.disconnect()
-        

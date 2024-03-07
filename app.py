@@ -1,10 +1,10 @@
 # To run, follow these steps:
 # Start debug mode:
-# cd /etc/bell_sys_monitor_client && python3 -m app
-# systemctl start bell_sys_monitor_client
-# systemctl restart bell_sys_monitor_client
-# systemctl stop bell_sys_monitor_client
-# systemctl status bell_sys_monitor_client
+# cd /etc/bell/bellwatchdog && python3 -m app
+# systemctl start bellwatchdog
+# systemctl restart bellwatchdog
+# systemctl stop bellwatchdog
+# systemctl status bellwatchdog
 
 # Importing necessary libraries for WebSocket communication and system operations
 import asyncio
