@@ -35,6 +35,19 @@ print_progress() {
     if [[ $percent_done -eq 100 ]]; then echo; fi # Move to a new line at 100%
 }
 
+# Parse command-line arguments for API key and Tunnel ID
+API_KEY=""
+TUNNEL_ID=""
+
+if [ $# -eq 2 ]; then
+    API_KEY="$1"
+    TUNNEL_ID="$2"
+else
+    echo "Usage: $0 <API_KEY> <TUNNEL_ID>"
+    exit 1
+fi
+
+
 # Determine the package manager and check system compatibility
 PKG_MANAGER=""
 if command -v apt > /dev/null; then
@@ -258,86 +271,25 @@ move_service() {
     return 0
 }
 
-# Create a connection
-create_connection() {
-    local new_hostname=""
-    local default_hostname=""
+# Function to save API key and Tunnel ID in the config file
+save_api_and_tunnel_id() {
+    local config_file_path="/etc/bell/bellwatchdog/utils/sys/config/conf.py"
 
-    while true; do
-        print_info "Enter the WebSocket hostname or IP address (e.g., socket.mydomain.com or 12.34.56.78)${default_hostname:+ (default $default_hostname)}:"
-        read -r new_hostname
-
-        # If no new hostname entered and default is available, use the default
-        if [ -z "$new_hostname" ] && [ ! -z "$default_hostname" ]; then
-            new_hostname=$default_hostname
-        fi
-
-        # If new_hostname is still empty, prompt again
-        if [ -z "$new_hostname" ]; then
-            print_error "You must enter a valid hostname or IP address."
-            continue # Skip the rest of the loop and prompt again
-        fi
-
-        # Attempt to connect with the provided or default hostname
-        if test_connection "$new_hostname"; then
-            print_success "Connection successful."
-            break # Exit loop if connection is successful
-        else
-            print_error "Failed to connect to $new_hostname. Please ensure the WebSocket server is online and accessible."
-            # Set the entered hostname as the new default for the next prompt iteration
-            default_hostname=$new_hostname
-        fi
-    done
-}
-
-# Test the connection to the websocket
-test_connection() {
-    local hostname=$1
-    print_info "Attempting to create a connection to $hostname..."
-    if curl -s --head --request GET "$hostname" | grep "200 OK" > /dev/null | tee -a $LOG_FILE; then
-        print_success "Successfully connected to $hostname"
-        
-        # Now, call save_hostname and use its return value
-        save_hostname "$hostname"
-        local save_status=$?
-        if [ $save_status -eq 0 ]; then
-            print_success "Hostname has been successfully saved after successful connection."
-            return 0
-        else
-            print_error "Failed to save the hostname after successful connection."
-            return 1
-        fi
-    else
-        print_error "Failed to connect to $hostname. Please ensure the websocket is online and accessible."
+    # Check if the config file exists
+    if [ ! -f "$config_file_path" ]; then
+        print_error "Config file not found."
         return 1
     fi
-}
 
-# Save the entered hostname to .env
-save_hostname() {
-    local hostname=$1
-    local target_dir="/etc/bell/bellwatchdog"
-    local env_file_path="$target_dir/.env"
+    # Update or add API key and Tunnel ID
+    sed -i "s|^API_KEY =.*|API_KEY = '$API_KEY'|" "$config_file_path"
+    sed -i "s|^TUNNEL_ID =.*|TUNNEL_ID = '$TUNNEL_ID'|" "$config_file_path"
 
-    if [ -f "$env_file_path" ]; then
-        # The .env file exists, attempt to update SERVER_HOSTNAME
-        sed -i "s|SERVER_HOSTNAME='.*'|SERVER_HOSTNAME='wss://$hostname'|g" "$env_file_path"
-        
-        if [ $? -eq 0 ]; then
-            print_success "Hostname successfully updated in .env config file."
-        else
-            print_error "Failed to update hostname in .env config file."
-        fi
+    # Check if sed commands succeeded
+    if grep -q "API_KEY = '$API_KEY'" "$config_file_path" && grep -q "TUNNEL_ID = '$TUNNEL_ID'" "$config_file_path"; then
+        print_success "API key and Tunnel ID successfully updated in config file."
     else
-        # The .env file doesn't exist, create it and add SERVER_HOSTNAME
-        echo "Creating a new .env file at $env_file_path"
-        echo "SERVER_HOSTNAME='$hostname'" > "$env_file_path"
-        
-        if [ $? -eq 0 ]; then
-            print_success "The .env file was successfully created and the hostname was saved."
-        else
-            print_error "Failed to create .env file and save hostname."
-        fi
+        print_error "Failed to update API key and Tunnel ID in config file."
     fi
 }
 
@@ -540,8 +492,8 @@ start_setup() {
         exit 1
     fi
 
-    if ! create_connection; then
-        print_error "Failed to establish a connection. Please ensure the WebSocket server is online and accessible."
+    if ! save_api_and_tunnel_id; then
+        print_error "Failed to save the data. Please try again."
         exit 1
     fi
 
