@@ -145,4 +145,19 @@ This README serves as a guide for deploying the Bell Watchdog as a systemd servi
 
 <summary>Automatic Installation</summary>
 
+## Download script
+- You can use our auto installer script that will install all packages and will configure it self. To start with the script just follow this steps:
+
+  ````
+  wget https://github.com/bellnetwork/Bell-Watchdog-Client/blob/main/installation/install.sh
+  ````
+
+````
+chmod +x install.sh
+````
+
+````
+./install.sh
+````
+
 </details>
